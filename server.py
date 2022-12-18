@@ -1,47 +1,34 @@
-import socket
 import threading
-import pickle
+import socket
 
-HOST = socket.gethostbyname('localhost')
-PORT = 9999
 clients = []
 
+def main():
 
-def appServer():
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     try:
-        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print(f'Server listening on: {HOST},{PORT}')
+        server.bind(('localhost', 7777))
+        server.listen()
+    except:
+        return print('\nNão foi possível iniciar o servidor!\n')
 
-    except socket.error as e:
-        print(f'Erro ao abrir server: {e}')
-
-    server.bind((HOST, PORT))
-
-    server.listen(10)
-
-    # Escutando client
-    usernames_list = []
     while True:
+        print("Aguardando a conexões...")
         client, addr = server.accept()
         clients.append(client)
-        print(client, addr)
+        print(client)
+        
+        thread = threading.Thread(target=messagesTreatment, args=[client])
+        thread.start()
 
-        #^ Capturando o username de client 
-        username_from_client = client.recv(1048).decode('utf-8')
-        usernames_list.append(username_from_client)
-        print(usernames_list)
-
-        th_broadcast = threading.Thread(target=tratandoMsg, args=[client])
-        th_broadcast.start()
-
-def tratandoMsg(client):
+def messagesTreatment(client):
     while True:
         try:
             msg = client.recv(2048)
             broadcast(msg, client)
         except:
-            removeClient(client)
+            deleteClient(client)
             break
 
 
@@ -51,12 +38,10 @@ def broadcast(msg, client):
             try:
                 clientItem.send(msg)
             except:
-                print("Error sending message")
-                removeClient()
+                deleteClient(clientItem)
 
 
-def removeClient(client):
+def deleteClient(client):
     clients.remove(client)
 
-
-appServer()
+main()
