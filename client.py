@@ -38,9 +38,8 @@ def appClient():
     username = input('\nUsuário: ')
     print(f'{username} conectado!')
 
-    # ^Enviando username serializado para o  server
-    username_serialized = pickle.dumps(username)
-    client.send(username_serialized)
+    # ^Enviando username para o server
+    client.send(username.encode('utf-8'))
 
     dialog_bar = customtkinter.CTkEntry(master=chat_frame,
                                         font=('Inter', 15),

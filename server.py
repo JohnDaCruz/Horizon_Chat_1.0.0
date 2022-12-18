@@ -27,20 +27,15 @@ def appServer():
         clients.append(client)
         print(client, addr)
 
-        #^ Capturando o username de client e deserializando
-        username_serialized = client.recv(1048)
-        username_deserialized = pickle.loads(username_serialized)
-        usernames_list.append(username_deserialized)
+        #^ Capturando o username de client 
+        username_from_client = client.recv(1048).decode('utf-8')
+        usernames_list.append(username_from_client)
         print(usernames_list)
 
-        #^ Serializando a lista para fazer o broadcast
-        username_serialized_again = pickle.dumps(usernames_list)
-        # Necessária pois precisamos receber outros clients
         th_broadcast = threading.Thread(target=tratandoMsg, args=[client])
         th_broadcast.start()
 
-
-def tratandoMsg(client,):
+def tratandoMsg(client):
     while True:
         try:
             msg = client.recv(2048)
@@ -50,7 +45,7 @@ def tratandoMsg(client,):
             break
 
 
-def broadcast(msg, client, ):
+def broadcast(msg, client):
     for clientItem in clients:
         if clientItem != client:
             try:
